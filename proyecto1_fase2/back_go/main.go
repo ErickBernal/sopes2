@@ -2,31 +2,67 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func main() {
-	for {
-		m := ReadMemoryStats()
-		gb := "Gb"
-		kb := "Kb"
-		fmt.Println("Total memory: ", m.MemTotal, kb)
-		fmt.Println("Memory Available: ", m.MemAvailable, kb)
-		fmt.Println("Memory used: ", m.MemTotal-m.MemAvailable, kb)
+	puerto := "8080"
+	http.HandleFunc("/home", homeHandler)
+	fmt.Println("Servidor escuchando en el puerto " + puerto)
+	// http.ListenAndServe(":"+puerto, nil)
+	http.HandleFunc("/ram", handleCors(getRamHandler))
+	log.Fatal(http.ListenAndServe(":"+puerto, nil))
+}
 
-		fmt.Println("-----")
-		fmt.Println("Total memory: ", KbToGb(m.MemTotal), gb)
-		fmt.Println("Memory Available: ", KbToGb(m.MemAvailable), gb)
-		fmt.Println("Memory used: ", KbToGb(m.MemTotal-m.MemAvailable), gb)
-		fmt.Println("*********************************************************")
-		time.Sleep(time.Second)
+// ------------------------------ Server ----------------------------------
+type Ram struct {
+	Total      float32 `json:"total"`
+	Disponible float32 `json:"disponible"`
+	EnUso      float32 `json:"usado"`
+}
+
+func GetRam() Ram {
+	m := ReadMemoryStats()
+	ram := Ram{
+		Total:      KbToGb(m.MemTotal),
+		Disponible: KbToGb(m.MemAvailable),
+		EnUso:      KbToGb(m.MemTotal - m.MemAvailable),
+	}
+	// fmt.Println("--> ", ram)
+	return ram
+}
+
+// GET
+func getRamHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(GetRam())
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello from Golang!!!")
+	fmt.Println("homeHandler")
+}
+
+func handleCors(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next(w, r)
 	}
 }
 
+// ------------------------------  RAM ----------------------------------------
 type Memory struct {
 	MemTotal     int
 	MemFree      int

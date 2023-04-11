@@ -1,0 +1,21 @@
+.login {
+    width: max-width;
+    height: 100vh;
+    /* ancho de la aplicacion */
+    /*altura del navegador*/
+    padding-top: 10px;
+    /*margen interno*/
+    background-color: #222;
+    font-family: Lato, sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    /*para que no todos los componentes este en una sola linea para reajustar conforme su tamanio*/
+    justify-content: center;
+    align-items: center;
+  
+  }
+  
+  .form-label {
+    flex-wrap: wrap;
+    color: white;
+  }
