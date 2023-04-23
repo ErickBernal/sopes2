@@ -68,23 +68,28 @@ func getCPUSample() (idle, total uint64) {
 }
 
 func main() {
-	idle0, total0 := getCPUSample()
-	time.Sleep(3 * time.Second)
-	idle1, total1 := getCPUSample()
+	for {
 
-	idleTicks := float64(idle1 - idle0)
-	totalTicks := float64(total1 - total0)
-	cpuUsage := 100 * (totalTicks - idleTicks) / totalTicks
+		idle0, total0 := getCPUSample()
+		time.Sleep(1 * time.Second)
+		idle1, total1 := getCPUSample()
 
-	// fmt.Printf("CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
-	fmt.Printf("CPU usage is %f%% \n", cpuUsage)
+		idleTicks := float64(idle1 - idle0)
+		totalTicks := float64(total1 - total0)
+		cpuUsage := 100 * (totalTicks - idleTicks) / totalTicks
 
-	fmt.Println("------------------------")
+		// fmt.Printf("CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
+		fmt.Printf("CPU usage is %f%% \n", cpuUsage)
 
-	// Getting filesystem statistics
-	disk := DiskUsage("/")
-	fmt.Println("--- Disk ---")
-	fmt.Printf("	All: %.2f GB\n", float64(disk.All)/float64(GB))
-	fmt.Printf("	Used: %.2f GB\n", float64(disk.Used)/float64(GB))
-	fmt.Printf("	Free: %.2f GB\n", float64(disk.Free)/float64(GB))
+		fmt.Println("------------------------")
+
+		// Getting filesystem statistics
+		disk := DiskUsage("/")
+		fmt.Println("--- Disk ---")
+		fmt.Printf("	All: %.2f GB\n", float64(disk.All)/float64(GB))
+		fmt.Printf("	Used: %.2f GB\n", float64(disk.Used)/float64(GB))
+		fmt.Printf("	Free: %.2f GB\n", float64(disk.Free)/float64(GB))
+		fmt.Println("---------------------------")
+		fmt.Println("")
+	}
 }
